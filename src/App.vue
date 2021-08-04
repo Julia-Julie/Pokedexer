@@ -1,17 +1,21 @@
 <template>
   <div id="app">
-    <!-- <img alt="Vue logo" src="./assets/logo.png"> -->
-    <PokemonApp msg="Welcome Pokemon application"/>
+    <div class="nav">
+      <router-link to="/pokemons">Home link</router-link> |
+    </div>
+    <router-view />
   </div>
 </template>
 
+
+
 <script>
-import PokemonApp from './components/PokemonApp.vue'
+// import PokemonApp from './components/PokemonApp.vue'
 
 export default {
   name: 'App',
   components: {
-    PokemonApp
+    // PokemonApp
   }
 }
 </script>

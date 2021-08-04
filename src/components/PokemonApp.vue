@@ -4,17 +4,32 @@
       <h2>{{ heading }}</h2>
 
       <div class="pokemons__content">
-        <ul class="pokemons__list">
-          <li
-            class="pokemons__item"
+        <div class="pokemons__list">
+          <div
+            class="pokemon"
             v-for="(pokemon, index) in pokemons"
             v-bind:key="index"
           >
-            {{ pokemon.name }}
-            {{ pokemon.type }}
-          </li>
-        </ul>
+            <div class="pokemon__name">
+              {{ pokemon.name }}
+            </div>
 
+            <div class="pokemon__types">
+              Types:
+              <!-- 'julia-27, orest-24'  -->
+              <!-- [{name: "Julia", age: "27", village: "Birky"}, 
+                      {name: "Orest", age: "24", village: "Vel Most"}] 
+                        .map(el => ${el.name} - ${el.age}) -> ['julia-27', 'orest-24'].join(', ') -> 'julia-27, orest-24'
+                      -->
+              <!-- {}.(type = undefined).map()  -->
+              <!-- {{ pokemon.types ? pokemon.types.map(el => el.type.name).join(', ') : ' ' }} -->
+
+              <div class="pokemon__types--arr">
+                {{ getTypes(pokemon) }}
+              </div>
+            </div>
+          </div>
+        </div>
         <div class="pokemons__chosen">Here should be a chosen Pokemon</div>
       </div>
     </div>
@@ -22,35 +37,45 @@
 </template>
 
 <script>
+import axios from "axios";
 export default {
   name: "PokemonApp",
-  // props: {
-  //   msg: String
-  // },
 
   data: function () {
     return {
       heading: "Pokedex",
-      pokemons: [
-        { name: "pikachu", type: "fire" },
-
-        { name: "chobakabra", type: "fire" },
-
-        { name: "spider", type: "iron" },
-
-        { name: "clablah", type: "stone" },
-      ],
+      pokemons: [],
     };
   },
 
-  // methods: {
-  // getCharachers(id) {
-  //   fetch(`https://swapi.dev/api/people/${id}`, {
-  //     method: "Get",
-  //   })
-  //     .then((response) => response.json())
-  //     .then((json) => (this.character = json));
-  // },
+  created() {
+    this.getPokemons();
+  },
+
+  methods: {
+    getPokemons() {
+      axios("https://pokeapi.co/api/v2/pokemon?limit=12").then((response) => {
+        // response = [{name: "", url=""}, {name: "", url=""}, {name: "", url=""}......]  --line 60
+        response.data.results.forEach((pokemon) => {
+          //(url) => axios(url) -> return response from axios (some data about single pokemon) --line 62
+          this.makeRequest(pokemon.url).then((res) => {
+            // then -> make some action with comming data{res.data} (we push data to general array "this.pokemons") --line 64
+            this.pokemons.push(res.data);
+          });
+        });
+      });
+    },
+    //function take one parameter{url} then meka axios request and return data from this request --line 71
+    async makeRequest(url) {
+      return await axios(url);
+    },
+
+    getTypes(pokemon) {
+      return pokemon.types
+        ? pokemon.types.map((el) => el.type.name).join(", ")
+        : " ";
+    },
+  },
 };
 </script>
 
@@ -80,14 +105,47 @@ export default {
   }
 
   &__list {
-    @include items-align(grid, unset, space-between, center);
+    @include items-align(grid, unset, space-between, stretch);
     grid-template-columns: repeat(3, 30%);
-    flex-basis: 60%;
+    flex-basis: 65%;
     border: 1px solid blue;
   }
 
+  .pokemon {
+    list-style: none;
+    margin: 1rem;
+    padding: 1rem 1.5rem;
+    border: 1px dotted #ccc;
+
+    &__name {
+      color: rgb(12, 109, 64);
+      font-size: 1.5rem;
+      font-weight: bold;
+      text-transform: capitalize;
+      margin-bottom: 0.5rem;
+    }
+
+    &__types {
+      color: rgb(3, 27, 16);
+      font-size: 1rem;
+      font-weight: 400;
+      font-style: italic;
+      margin-bottom: 0.3rem;
+
+      &--arr{
+        &:nth-child(odd){
+          background-color: hotpink;
+        }
+
+         &:nth-child(even){
+          background-color: rgb(223, 255, 105);
+        }
+      }
+    }
+  }
+
   &__chosen {
-    flex-basis: 35%;
+    flex-basis: 30%;
     border: 1px solid red;
   }
 }
