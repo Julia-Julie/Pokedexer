@@ -1,7 +1,7 @@
 <template>
   <div class="pokemons">
     <div class="container">
-      <h2>{{ heading }}</h2>
+      <h2 @click="testgetPokemons">{{ heading }}</h2>
 
       <div class="pokemons__content">
         <div class="pokemons__list">
@@ -10,6 +10,10 @@
             v-for="(pokemon, index) in pokemons"
             v-bind:key="index"
           >
+            <div class="pokemon__photo">
+              <img v-bind:src="pokemon.sprites.back_default" />
+            </div>
+
             <div class="pokemon__name">
               {{ pokemon.name }}
             </div>
@@ -24,8 +28,17 @@
               <!-- {}.(type = undefined).map()  -->
               <!-- {{ pokemon.types ? pokemon.types.map(el => el.type.name).join(', ') : ' ' }} -->
 
-              <div class="pokemon__types--arr">
+              <!-- <div class="pokemon__types--arr">
                 {{ getTypes(pokemon) }}
+              </div> -->
+
+              <div
+                v-for="(type, index) in pokemon.types"
+                v-bind:key="index"
+                class="pokemon__type"
+                v-bind:class="type.type.name"
+              >
+                {{ type.type.name }}
               </div>
             </div>
           </div>
@@ -65,6 +78,21 @@ export default {
         });
       });
     },
+
+    testgetPokemons() {
+      axios("https://pokeapi.co/api/v2/pokemon?limit=12").then((response) => {
+        // console.log(response.data.results)
+        response.data.results.forEach((resultOne) => {
+          console.log(resultOne, resultOne.url);
+          this.makeRequest(resultOne.url).then((respId) =>
+            console.log(
+              `Id: ${respId.data.id}, Name: ${respId.data.name}, Height:${respId.data.height}`
+            )
+          );
+        });
+      });
+    },
+
     //function take one parameter{url} then meka axios request and return data from this request --line 71
     async makeRequest(url) {
       return await axios(url);
@@ -99,6 +127,10 @@ export default {
   align-items: $vertical;
 }
 
+%transition {
+  transition: all ease-in-out 0.3s;
+}
+
 .pokemons {
   &__content {
     @include items-align(flex, row, space-between, center);
@@ -115,7 +147,22 @@ export default {
     list-style: none;
     margin: 1rem;
     padding: 1rem 1.5rem;
-    border: 1px dotted #ccc;
+    // border: 1px dotted #ccc;
+    box-shadow: 0px 0px 5px 2px #ccc;
+    cursor: pointer;
+    @extend %transition;
+
+    &:hover {
+      box-shadow: 0px 0px 7px 3px #bbb;
+      transform: scale(1.1);
+
+      .pokemon__name {
+        color: rgb(139, 212, 69);
+        @extend %transition;
+        font-weight: bolder;
+        text-shadow: 2px 2px 2px rgb(0, 0, 0);
+      }
+    }
 
     &__name {
       color: rgb(12, 109, 64);
@@ -131,16 +178,13 @@ export default {
       font-weight: 400;
       font-style: italic;
       margin-bottom: 0.3rem;
+    }
 
-      &--arr{
-        &:nth-child(odd){
-          background-color: hotpink;
-        }
-
-         &:nth-child(even){
-          background-color: rgb(223, 255, 105);
-        }
-      }
+    &__type {
+      display: inline-block;
+      padding: 5px 10px;
+      margin: 5px;
+      font-weight: 300;
     }
   }
 
@@ -148,5 +192,28 @@ export default {
     flex-basis: 30%;
     border: 1px solid red;
   }
+}
+
+.grass {
+      background-color: rgba(97, 192, 97, 0.61);
+}
+
+.poison {
+  background-color: rgb(158, 99, 158);
+}
+
+.fire {
+  background-color: rgb(221, 105, 90);
+}
+.flying {
+  background-color: rgb(123, 190, 230);
+}
+
+.bug {
+  background-color: rgb(211, 109, 177);
+}
+
+.water {
+  background-color: rgb(43, 113, 170);
 }
 </style>
